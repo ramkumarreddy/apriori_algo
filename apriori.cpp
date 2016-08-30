@@ -95,6 +95,25 @@ int check(vector< vector <int> > data, vector<int> x)
 	return 0;
 }
 
+int search(node *root, vector<int> x)
+{
+	int occur=1;
+	node *temp = root;
+	vector<int>::iterator i;
+	for(i = x.begin(); i != x.end() && occur==1; i++)
+	{
+		if(temp->child[*i]!=NULL)
+		{
+			temp = temp->child[*i];
+		}
+		else
+		{
+			occur=0;
+		}
+	}
+	return occur;
+}
+
 int pri_tree(node *root)
 {
 	node *temp = root;
@@ -121,6 +140,7 @@ int main()
 	vector<vector <int> > dupfim;
 	vector<string> tempvector;
 	vector<int> inttempvector;
+	vector<int> intdupvector;
 
 	set<string> mapp;
 
@@ -134,7 +154,7 @@ int main()
 	set<string>::iterator setiter;
 
 	string line;
-    int i=0,j=0,p,count,match=1;
+    int i=0,j=0,p,count,match=1,found;
     int toput=0,total_itemsets=0;
     float minsup=0.4;
 
@@ -223,10 +243,22 @@ int main()
 					intdCol++;
 					j--;
 				}
+				if(match==0)
+					continue;
 				inttempvector.push_back(*intCol);
 				inttempvector.push_back(*intdCol);
+				toput = 1;
+				found = 1;
+				for(int z=0;z<inttempvector.size() && found==1;z++)
+				{
+					intdupvector = inttempvector;
+					intdupvector.erase(intdupvector.begin()+z);
+					found = search(root,intdupvector);
+				}
+				if(found==0)
+					continue;
 				toput = check(intdata, inttempvector);
-				if(toput == 1)
+				if(toput == 1 && found==1)
 					dupfim.push_back(inttempvector);
 		}
 	}
@@ -244,6 +276,16 @@ int main()
 	}
 	cout << "hello\n";
 	pri_tree(root);
+	cout << "hello\n";
+
+	// search working
+	// inttempvector.clear();
+	// inttempvector.push_back(6);
+	// inttempvector.push_back(16);
+	// cout << search(root, inttempvector);
+	// cout << "hello\n";
+
+
 	// node *root = createnode();
 	// inttempvector.clear();
 	// inttempvector.push_back(1);
