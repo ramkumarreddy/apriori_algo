@@ -11,6 +11,8 @@ using namespace tr1;
 
 
 int n=0;
+float mincount;
+
 bool myfunction (int i, int j) {
   return (i==j);
 }
@@ -18,6 +20,8 @@ bool myfunction (int i, int j) {
 typedef struct Node
 {
 	struct Node *child[20];
+	int occur;
+	int value;
 }node;
 
 node *createnode(void)
@@ -27,6 +31,8 @@ node *createnode(void)
 	if(temp)
 	{
 		int i;
+		temp->occur = 0;
+		temp->value = 0;
 		for(i = 0; i < 20; i++)
 		{
 			temp->child[i] = NULL;
@@ -35,14 +41,31 @@ node *createnode(void)
 	return temp;
 };
 
-// void insert(node *root, vector<int> x)
-// {
-// 	vector<int>::iterator introw;
-// 	for(introw=x.begin(); introw != x.end(); introw++)
-// 	{
+node insert(node *root, vector<vector <int> > x)
+{
+	node *temp;
+	vector< vector <int> >::iterator introw;
+	vector<int>::iterator intcol;
+	for(introw=x.begin(); introw != x.end(); introw++)
+	{
+		temp = root;
+		for(intcol = introw->begin(); intcol != introw->end(); intcol++)
+		{
+			if(!temp->child[*intcol])
+			{
+				temp->child[*intcol] = createnode();
+				temp->value = *intcol;
+			}
+			else
+			{
+				temp->occur++;
+			}
+			temp = temp->child[*intcol];
+		}
 
-// 	}
-// }
+	}
+	return *root;
+}
 
 int check(vector< vector <int> > data, vector<int> x)
 {
@@ -67,13 +90,25 @@ int check(vector< vector <int> > data, vector<int> x)
     		occurences++;
     	}
 	}
-	if(occurences>2)
+	if(occurences>mincount)
 		return 1;
 	return 0;
-	// cout << occurences;
-	// cout << " ";
-	// return occurences;
 }
+
+int pri_tree(node *root)
+{
+	node *temp = root;
+	for(int i=1;i<=16;i++)
+	{
+		if(temp->child[i]!=NULL)
+		{
+			cout << i;
+			cout << " ";
+			pri_tree(temp->child[i]);
+		}
+	}	
+}
+
 
 
 
@@ -99,8 +134,9 @@ int main()
 	set<string>::iterator setiter;
 
 	string line;
-    int i=0,j=0,p,count,minsup=2,match=1;
-    int toput=0;
+    int i=0,j=0,p,count,match=1;
+    int toput=0,total_itemsets=0;
+    float minsup=0.4;
 
 	ifstream  data("TextbookInput.csv");
     while(getline(data,line))
@@ -123,13 +159,15 @@ int main()
     count=1;
 	for (setiter=mapp.begin(); setiter != mapp.end(); setiter++)
 	{
-		cout << *setiter+"\n";
+		// cout << *setiter+"\n";
 		set_index[*setiter]=count++;
 	}
 	n=count-1;
+
     for (itRow = idata.begin(); itRow != idata.end(); itRow++)
 	{
 		inttempvector.clear();
+		total_itemsets++;
     	for (itCol = itRow->begin(); itCol != itRow->end(); itCol++) 
     	{
     		inttempvector.push_back(set_index[*itCol]);
@@ -149,18 +187,19 @@ int main()
     		occur[*intCol]+=1;
     	}
 	}
-
-	minsup = 2;
+	mincount=minsup*total_itemsets;
+	node *root = createnode();
 	for(i=1;i<=n;i++)
 	{
-		if(occur[i]>minsup)
+		if(occur[i]>mincount)
 		{
 			inttempvector.clear();
 			inttempvector.push_back(i);
 			fim.push_back(inttempvector);
 		}
 	}
-	
+	*root = insert(root, fim);
+
 	for (intRow = fim.begin(); intRow != fim.end(); intRow++)
 	{
 		match=1;
@@ -188,10 +227,11 @@ int main()
 				inttempvector.push_back(*intdCol);
 				toput = check(intdata, inttempvector);
 				if(toput == 1)
-					dupfim.push_back(inttempvector);				
+					dupfim.push_back(inttempvector);
 		}
 	}
 	fim = dupfim;
+	*root = insert(root, fim);
 	dupfim.clear();
 	for (intRow = fim.begin(); intRow != fim.end(); intRow++)
 	{
@@ -202,6 +242,8 @@ int main()
     	}
     	cout << "\n";
 	}
+	cout << "hello\n";
+	pri_tree(root);
 	// node *root = createnode();
 	// inttempvector.clear();
 	// inttempvector.push_back(1);
