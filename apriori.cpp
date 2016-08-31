@@ -110,10 +110,58 @@ int check(vector< vector <int> > data, vector<int> x)
     	}
 	}
 	return occurences;
-	if(occurences>mincount)
+	if(occurences>=mincount)
 		return 1;
 	return 0;
 }
+
+int binary(vector<int> data,int x)
+{
+	int i,start=0;
+	int end = data.size()-1;
+	int mid=(start+end)/2;
+	while(1)
+	{
+		if(start>end)
+		{
+			return 0;
+		}
+		else if(data[mid]==x)
+		{
+			return 1;
+		}
+		else if(data[mid]<x)
+		{
+			start = mid+1;
+			mid = (start+end)/2;
+		}
+		else if(data[mid]>x)
+		{
+			end = mid-1;
+			mid = (start+end)/2;
+		}
+	}
+}
+
+int checkb(vector< vector <int> > data, vector<int> x)
+{
+	int lendata = data.size(),occurences=0;
+	int len = x.size(), i, j, flag=0,z;
+	for(i=0; i < lendata; i++)
+	{
+		flag=0;
+		for(j = 0; j < len; j++)
+		{
+			z = binary(data[i],x[j]);
+			if(z == 1)
+				flag++;
+		}
+		if(flag == len)
+			occurences++;
+	}
+	return occurences;
+}
+
 
 int search(node *root, vector<int> x)
 {
@@ -179,10 +227,10 @@ int main()
 	string line;
     int i=0,j=0,p,count,match=1,found,w;
     int toput=0,total_itemsets=0;
-    float minsup=0.4;
+    float minsup=0.01;
 
-	ifstream  data("TextbookInput.csv");
-	// ifstream  data("inp.csv");
+	// ifstream  data("TextbookInput.csv");
+	ifstream  data("inp.csv");
     while(getline(data,line))
     {
         stringstream lineStream(line);
@@ -238,7 +286,7 @@ int main()
 	intduplicatevector.clear();
 	for(i=1;i<=n;i++)
 	{
-		if(occur[i]>mincount)
+		if(occur[i]>=mincount)
 		{
 			intduplicatevector.push_back(occur[i]);
 			inttempvector.clear();
@@ -299,8 +347,8 @@ int main()
 					}
 					if(found==0)
 						continue;
-					toput = check(intdata, inttempvector);
-					if(toput > mincount && found==1)
+					toput = checkb(intdata, inttempvector);
+					if(toput >= mincount && found==1)
 					{
 						dupfim.push_back(inttempvector);
 						intduplicatevector.push_back(toput);
