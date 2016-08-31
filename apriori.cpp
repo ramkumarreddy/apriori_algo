@@ -19,12 +19,12 @@ bool myfunction (int i, int j) {
 
 typedef struct Node
 {
-	struct Node *child[20];
+	struct Node **child;
 	int occur;
 	int value;
 }node;
 
-node *createnode(void)
+node *createnode(int x)
 {
 	node *temp = NULL;
 	temp = (node*)malloc(sizeof(node));
@@ -33,7 +33,8 @@ node *createnode(void)
 		int i;
 		temp->occur = 0;
 		temp->value = 0;
-		for(i = 0; i < 20; i++)
+		temp->child = (node**)malloc(x*sizeof(node*));
+		for(i = 0; i < x; i++)
 		{
 			temp->child[i] = NULL;
 		}
@@ -41,7 +42,7 @@ node *createnode(void)
 	return temp;
 };
 
-node insert(node *root, vector<vector <int> > x, vector<int> y)
+node insert(node *root, vector<vector <int> > x, vector<int> y, int p)
 {
 	node *temp;
 	vector< vector <int> >::iterator introw;
@@ -55,7 +56,7 @@ node insert(node *root, vector<vector <int> > x, vector<int> y)
 		{
 			if(!temp->child[*intcol])
 			{
-				temp->child[*intcol] = createnode();
+				temp->child[*intcol] = createnode(p);
 			}
 			temp = temp->child[*intcol];
 			temp->value = *intcol;
@@ -154,6 +155,7 @@ int pri_tree(node *root)
 int main()
 {
 	unordered_map<string,int> set_index;
+	unordered_map<int,string> reverse_mapping;
 	vector<vector <string> > idata;
 	vector<vector <int> > intdata;
 	vector<vector <int> > fim;
@@ -180,6 +182,7 @@ int main()
     float minsup=0.4;
 
 	ifstream  data("TextbookInput.csv");
+	// ifstream  data("inp.csv");
     while(getline(data,line))
     {
         stringstream lineStream(line);
@@ -201,7 +204,9 @@ int main()
 	for (setiter=mapp.begin(); setiter != mapp.end(); setiter++)
 	{
 		// cout << *setiter+"\n";
-		set_index[*setiter]=count++;
+		set_index[*setiter] = count;
+		reverse_mapping[count] = *setiter;
+		count++;
 	}
 	n=count-1;
 
@@ -229,7 +234,7 @@ int main()
     	}
 	}
 	mincount=minsup*total_itemsets;
-	node *root = createnode();
+	node *root = createnode(n+1);
 	intduplicatevector.clear();
 	for(i=1;i<=n;i++)
 	{
@@ -243,7 +248,16 @@ int main()
 	}
 
 
-	*root = insert(root, fim, intduplicatevector);
+	*root = insert(root, fim, intduplicatevector, n);
+	for (intRow = fim.begin(); intRow != fim.end(); intRow++)
+	{
+    	for (intCol = intRow->begin(); intCol != intRow->end(); intCol++) 
+    	{
+    		cout << reverse_mapping[*intCol];
+    		cout << " ";
+    	}
+    	cout << "\n";
+	}
 	w=0;
 	while(1)
 	{
@@ -294,7 +308,7 @@ int main()
 			}
 		}
 		fim = dupfim;
-		*root = insert(root, fim, intduplicatevector);
+		*root = insert(root, fim, intduplicatevector, n);
 		dupfim.clear();
 		if(fim.empty())
 		{
@@ -305,21 +319,11 @@ int main()
 		{
 	    	for (intCol = intRow->begin(); intCol != intRow->end(); intCol++) 
 	    	{
-	    		cout << *intCol;
+	    		cout << reverse_mapping[*intCol];
 	    		cout << " ";
 	    	}
 	    	cout << "\n";
 		}
 		w++;
 	}
-	// cout << "hello\n";
-	// pri_tree(root);
-	// cout << "hello\n";
-
-	// search working
-	// inttempvector.clear();
-	// inttempvector.push_back(6);
-	// inttempvector.push_back(16);
-	// cout << search(root, inttempvector);
-	// cout << "hello\n";
 }
