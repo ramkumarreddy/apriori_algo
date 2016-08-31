@@ -154,7 +154,7 @@ int main()
 	set<string>::iterator setiter;
 
 	string line;
-    int i=0,j=0,p,count,match=1,found;
+    int i=0,j=0,p,count,match=1,found,w;
     int toput=0,total_itemsets=0;
     float minsup=0.4;
 
@@ -218,65 +218,76 @@ int main()
 			fim.push_back(inttempvector);
 		}
 	}
-	*root = insert(root, fim);
 
-	for (intRow = fim.begin(); intRow != fim.end(); intRow++)
-	{
-		match=1;
-		for(intdRow = intRow+1; intdRow != fim.end() && match==1; intdRow++)
-		{
-				match=1;
-				j=0;
-				intCol = intRow->begin();
-				intdCol = intdRow->begin();
-				inttempvector.clear();
-				while(j!=0)
-				{
-					// cout << "hello";
-					if(*intCol!=*intdCol)
-					{
-						match=0;
-						break;
-					}
-					inttempvector.push_back(*intCol);
-					intCol++;
-					intdCol++;
-					j--;
-				}
-				if(match==0)
-					continue;
-				inttempvector.push_back(*intCol);
-				inttempvector.push_back(*intdCol);
-				toput = 1;
-				found = 1;
-				for(int z=0;z<inttempvector.size() && found==1;z++)
-				{
-					intdupvector = inttempvector;
-					intdupvector.erase(intdupvector.begin()+z);
-					found = search(root,intdupvector);
-				}
-				if(found==0)
-					continue;
-				toput = check(intdata, inttempvector);
-				if(toput == 1 && found==1)
-					dupfim.push_back(inttempvector);
-		}
-	}
-	fim = dupfim;
+
 	*root = insert(root, fim);
-	dupfim.clear();
-	for (intRow = fim.begin(); intRow != fim.end(); intRow++)
+	w=0;
+	while(1)
 	{
-    	for (intCol = intRow->begin(); intCol != intRow->end(); intCol++) 
-    	{
-    		cout << *intCol;
-    		cout << " ";
-    	}
-    	cout << "\n";
+		for (intRow = fim.begin(); intRow != fim.end(); intRow++)
+		{
+			match=1;
+			for(intdRow = intRow+1; intdRow != fim.end() && match==1; intdRow++)
+			{
+					match=1;
+					j=w;
+					intCol = intRow->begin();
+					intdCol = intdRow->begin();
+					inttempvector.clear();
+					while(j!=0)
+					{
+						// cout << "hello resr";
+						if(*intCol!=*intdCol)
+						{
+							match=0;
+							break;
+						}
+						inttempvector.push_back(*intCol);
+						intCol++;
+						intdCol++;
+						j--;
+					}
+					if(match==0)
+						continue;
+					inttempvector.push_back(*intCol);
+					inttempvector.push_back(*intdCol);
+					toput = 1;
+					found = 1;
+					for(int z=0;z<inttempvector.size() && found==1;z++)
+					{
+						intdupvector = inttempvector;
+						intdupvector.erase(intdupvector.begin()+z);
+						found = search(root,intdupvector);
+					}
+					if(found==0)
+						continue;
+					toput = check(intdata, inttempvector);
+					if(toput == 1 && found==1)
+						dupfim.push_back(inttempvector);
+			}
+		}
+		fim = dupfim;
+		*root = insert(root, fim);
+		dupfim.clear();
+		if(fim.empty())
+		{
+			// cout << "empty\n";
+			break;
+		}
+		for (intRow = fim.begin(); intRow != fim.end(); intRow++)
+		{
+	    	for (intCol = intRow->begin(); intCol != intRow->end(); intCol++) 
+	    	{
+	    		cout << *intCol;
+	    		cout << " ";
+	    	}
+	    	cout << "\n";
+		}
+		w++;
 	}
-	cout << "hello\n";
-	pri_tree(root);
-	cout << "hello\n";
+	// cout << "hello\n";
+	// pri_tree(root);
+	// cout << "hello\n";
 
 	// search working
 	// inttempvector.clear();
@@ -284,12 +295,4 @@ int main()
 	// inttempvector.push_back(16);
 	// cout << search(root, inttempvector);
 	// cout << "hello\n";
-
-
-	// node *root = createnode();
-	// inttempvector.clear();
-	// inttempvector.push_back(1);
-	// inttempvector.push_back(11);
-	// insert(root, inttempvector);
-
 }
