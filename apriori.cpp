@@ -41,11 +41,13 @@ node *createnode(void)
 	return temp;
 };
 
-node insert(node *root, vector<vector <int> > x)
+node insert(node *root, vector<vector <int> > x, vector<int> y)
 {
 	node *temp;
 	vector< vector <int> >::iterator introw;
 	vector<int>::iterator intcol;
+	vector<int>::iterator occurite;
+	occurite = y.begin();
 	for(introw=x.begin(); introw != x.end(); introw++)
 	{
 		temp = root;
@@ -54,16 +56,32 @@ node insert(node *root, vector<vector <int> > x)
 			if(!temp->child[*intcol])
 			{
 				temp->child[*intcol] = createnode();
-				temp->value = *intcol;
-			}
-			else
-			{
-				temp->occur++;
 			}
 			temp = temp->child[*intcol];
+			temp->value = *intcol;
 		}
-
+		temp->occur += *occurite;
+		occurite++;
 	}
+
+	// for(introw=x.begin(); introw != x.end(); introw++)
+	// {
+	// 	temp = root;
+	// 	for(intcol = introw->begin(); intcol != introw->end(); intcol++)
+	// 	{
+	// 		cout << *intcol;
+	// 		cout << " ";
+	// 	}
+	// 	cout << "\n";
+	// }
+	// cout << "hello\n";
+	// for(occurite = y.begin(); occurite!=y.end();occurite++)
+	// {
+	// 	cout << *occurite;
+	// 	cout << " ";
+	// }
+	// cout << "\n";
+	// cout << "hello1";
 	return *root;
 }
 
@@ -90,6 +108,7 @@ int check(vector< vector <int> > data, vector<int> x)
     		occurences++;
     	}
 	}
+	return occurences;
 	if(occurences>mincount)
 		return 1;
 	return 0;
@@ -117,19 +136,20 @@ int search(node *root, vector<int> x)
 int pri_tree(node *root)
 {
 	node *temp = root;
+	cout << temp->value;
+	cout << " ";
+	cout << temp->occur;
+	cout << "\n";
 	for(int i=1;i<=16;i++)
 	{
 		if(temp->child[i]!=NULL)
 		{
-			cout << i;
-			cout << " ";
+			// cout << i;
+			// cout << " ";
 			pri_tree(temp->child[i]);
 		}
 	}	
 }
-
-
-
 
 int main()
 {
@@ -141,6 +161,7 @@ int main()
 	vector<string> tempvector;
 	vector<int> inttempvector;
 	vector<int> intdupvector;
+	vector<int> intduplicatevector;
 
 	set<string> mapp;
 
@@ -209,10 +230,12 @@ int main()
 	}
 	mincount=minsup*total_itemsets;
 	node *root = createnode();
+	intduplicatevector.clear();
 	for(i=1;i<=n;i++)
 	{
 		if(occur[i]>mincount)
 		{
+			intduplicatevector.push_back(occur[i]);
 			inttempvector.clear();
 			inttempvector.push_back(i);
 			fim.push_back(inttempvector);
@@ -220,10 +243,11 @@ int main()
 	}
 
 
-	*root = insert(root, fim);
+	*root = insert(root, fim, intduplicatevector);
 	w=0;
 	while(1)
 	{
+		intduplicatevector.clear();
 		for (intRow = fim.begin(); intRow != fim.end(); intRow++)
 		{
 			match=1;
@@ -262,12 +286,15 @@ int main()
 					if(found==0)
 						continue;
 					toput = check(intdata, inttempvector);
-					if(toput == 1 && found==1)
+					if(toput > mincount && found==1)
+					{
 						dupfim.push_back(inttempvector);
+						intduplicatevector.push_back(toput);
+					}
 			}
 		}
 		fim = dupfim;
-		*root = insert(root, fim);
+		*root = insert(root, fim, intduplicatevector);
 		dupfim.clear();
 		if(fim.empty())
 		{
