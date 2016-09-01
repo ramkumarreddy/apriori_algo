@@ -152,6 +152,19 @@ int search(node *root, vector<int> x)
 	return occur;
 }
 
+int confidence(node *root, vector<int> x)
+{
+	// int occur=1;
+	node *temp = root;
+	vector<int>::iterator i;
+	for(i = x.begin(); i != x.end(); i++)
+	{
+		if(temp->child[*i]!=NULL)
+			temp = temp->child[*i];
+	}
+	return temp->occur;
+}
+
 int pri_tree(node *root)
 {
 	node *temp = root;
@@ -196,15 +209,16 @@ int main()
 	vector<vector <int> > intdata;
 	vector<vector <int> > fim;
 	vector<vector <int> > dupfim;
-	vector<vector <string> > assrules;
+	vector<vector <int> > assrules;
+	vector<vector <int> > fimrules;
 	vector<vector <int> > forassrules;
 	vector<string> tempvector;
 	vector<string> extempvector;
 	vector<int> inttempvector;
 	vector<int> intdupvector;
 	vector<int> intduplicatevector;
-	vector<string> intonevector;
-	vector<string> inttwovector;
+	vector<int> intonevector;
+	vector<int> inttwovector;
 
 	set<string> mapp;
 
@@ -220,7 +234,8 @@ int main()
 	string line;
     int i=0,j=0,p,count,match=1,found,w,totalfimcount=0;
     int toput=0,total_itemsets=0;
-    float minsup=0.45;
+    float minsup = 0.45;
+    float minconf = 0.8;
     extempvector.push_back("=>");
 
 	ifstream  data("TextbookInput.csv");
@@ -250,6 +265,8 @@ int main()
 		reverse_mapping[count] = *setiter;
 		count++;
 	}
+	set_index["=>"] = count;
+	reverse_mapping[count] = "=>";
 	n=count-1;
 
     for (itRow = idata.begin(); itRow != idata.end(); itRow++)
@@ -328,6 +345,8 @@ int main()
 		{
 			if(twodimen[*intRow->begin()][*intdRow->begin()]>=mincount)
 			{
+				intonevector.clear();
+				float cvv = twodimen[*intRow->begin()][*intdRow->begin()];
 				onetwodimen.push_back(*intRow->begin());
 				onetwodimen.push_back(*intdRow->begin());
 				dupfim.push_back(onetwodimen);
@@ -338,6 +357,22 @@ int main()
 				cout << reverse_mapping[*intdRow->begin()];
 				cout << "\n";
 				totalfimcount++;
+				if((cvv/occur[*intRow->begin()])>=minconf)
+				{
+					intonevector.push_back(*intRow->begin());
+					intonevector.push_back(set_index["=>"]);
+					intonevector.push_back(*intdRow->begin());
+					assrules.push_back(intonevector);
+					intonevector.clear();
+				}
+				if((cvv/occur[*intdRow->begin()])>=minconf)
+				{
+					intonevector.push_back(*intdRow->begin());
+					intonevector.push_back(set_index["=>"]);
+					intonevector.push_back(*intRow->begin());
+					assrules.push_back(intonevector);
+					intonevector.clear();
+				}
 			}
 		}
 	}
@@ -392,27 +427,27 @@ int main()
 						intduplicatevector.push_back(toput);
 						bbb=inttempvector.size();
 						forassrules = bina(bbb);
-						for(int ee = 0; ee < pow(2,bbb); ee++)
+						for(int ee = 1; ee < pow(2,bbb)-1; ee++)
 						{
 							intonevector.clear();
 							inttwovector.clear();
 							for(int ff = 0; ff < bbb; ff++)
 							{
 								if(forassrules[ee][ff] == 1)
-									intonevector.push_back(reverse_mapping[inttempvector[ff]]);
+									intonevector.push_back(inttempvector[ff]);
 								else
-									inttwovector.push_back(reverse_mapping[inttempvector[ff]]);
+									inttwovector.push_back(inttempvector[ff]);
 							}
-							intonevector.push_back("=>");
+							float qwerty = confidence(root, intonevector);
+							intonevector.push_back(set_index["=>"]);
 							for(int ooo=0;ooo<inttwovector.size();ooo++)
-							{
 								intonevector.push_back(inttwovector[ooo]);
-							}
-							// transform(intonevector.begin(), intonevector.end(), extempvector.begin(), intonevector.begin(), plus<string>());
-							// transform(intonevector.begin(), intonevector.end(), inttwovector.begin(), intonevector.begin(), plus<string>());
-							// assrules.push_back(intonevector+extempvector+inttwovector);
-							assrules.push_back(intonevector);
-							// assrules.push_back(inttwovector);
+							// cout << toput;
+							// cout << " ";
+							// cout << qwerty;
+							// cout << "\n";
+							if((toput/qwerty)>=minconf)
+								assrules.push_back(intonevector);
 						}
 					}
 			}
@@ -439,11 +474,11 @@ int main()
 	}
 	cout << totalfimcount << "\n";
 
-	for (itRow = assrules.begin(); itRow != assrules.end(); itRow++)
+	for (intRow = assrules.begin(); intRow != assrules.end(); intRow++)
 	{
-    	for (itCol = itRow->begin(); itCol != itRow->end(); itCol++) 
+    	for (intCol = intRow->begin(); intCol != intRow->end(); intCol++) 
     	{
-    		cout << *itCol;
+    		cout << reverse_mapping[*intCol];
     		if(intCol!=(intRow->end()-1))
     			cout << ",";
     	}
