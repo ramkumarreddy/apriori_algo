@@ -3,12 +3,13 @@
 #include <fstream>
 #include <string>
 #include <set>
+#include <bitset>
 #include <tr1/unordered_map>
 #include <bits/stdc++.h>
 using namespace std;
 using namespace tr1;
 
-int n=0;
+int n=0,bbb=0;
 float mincount;
 
 bool myfunction (int i, int j) {
@@ -165,6 +166,28 @@ int pri_tree(node *root)
 	}	
 }
 
+vector< vector <int> > bina(int x)
+{
+    int jj=0;
+    int p=0;
+    vector<int> qwe;
+    vector< vector <int> > qwer;
+    for(int i=0;i<pow(2,x);i++)
+    {
+        p=i;
+        jj=x;
+        while(jj!=0)
+        {
+            qwe.push_back(p%2);
+            p=p/2;
+            jj--;
+        }
+        qwer.push_back(qwe);
+        qwe.clear();
+    }
+    return qwer;
+}
+
 int main()
 {
 	unordered_map<string,int> set_index;
@@ -173,10 +196,15 @@ int main()
 	vector<vector <int> > intdata;
 	vector<vector <int> > fim;
 	vector<vector <int> > dupfim;
+	vector<vector <string> > assrules;
+	vector<vector <int> > forassrules;
 	vector<string> tempvector;
+	vector<string> extempvector;
 	vector<int> inttempvector;
 	vector<int> intdupvector;
 	vector<int> intduplicatevector;
+	vector<string> intonevector;
+	vector<string> inttwovector;
 
 	set<string> mapp;
 
@@ -190,12 +218,13 @@ int main()
 	set<string>::iterator setiter;
 
 	string line;
-    int i=0,j=0,p,count,match=1,found,w;
+    int i=0,j=0,p,count,match=1,found,w,totalfimcount=0;
     int toput=0,total_itemsets=0;
-    float minsup=0.01;
+    float minsup=0.45;
+    extempvector.push_back("=>");
 
-	// ifstream  data("TextbookInput.csv");
-	ifstream  data("inp.csv");
+	ifstream  data("TextbookInput.csv");
+	// ifstream  data("inp.csv");
     while(getline(data,line))
     {
         stringstream lineStream(line);
@@ -265,8 +294,8 @@ int main()
     	for (intCol = intRow->begin(); intCol != intRow->end(); intCol++) 
     	{
     		cout << reverse_mapping[*intCol];
-    		// cout << " ";
     	}
+    	totalfimcount++;
     	cout << "\n";
 	}
 
@@ -308,6 +337,7 @@ int main()
 				cout << ",";
 				cout << reverse_mapping[*intdRow->begin()];
 				cout << "\n";
+				totalfimcount++;
 			}
 		}
 	}
@@ -331,7 +361,6 @@ int main()
 					inttempvector.clear();
 					while(j!=0)
 					{
-						// cout << "hello resr";
 						if(*intCol!=*intdCol)
 						{
 							match=0;
@@ -361,6 +390,30 @@ int main()
 					{
 						dupfim.push_back(inttempvector);
 						intduplicatevector.push_back(toput);
+						bbb=inttempvector.size();
+						forassrules = bina(bbb);
+						for(int ee = 0; ee < pow(2,bbb); ee++)
+						{
+							intonevector.clear();
+							inttwovector.clear();
+							for(int ff = 0; ff < bbb; ff++)
+							{
+								if(forassrules[ee][ff] == 1)
+									intonevector.push_back(reverse_mapping[inttempvector[ff]]);
+								else
+									inttwovector.push_back(reverse_mapping[inttempvector[ff]]);
+							}
+							intonevector.push_back("=>");
+							for(int ooo=0;ooo<inttwovector.size();ooo++)
+							{
+								intonevector.push_back(inttwovector[ooo]);
+							}
+							// transform(intonevector.begin(), intonevector.end(), extempvector.begin(), intonevector.begin(), plus<string>());
+							// transform(intonevector.begin(), intonevector.end(), inttwovector.begin(), intonevector.begin(), plus<string>());
+							// assrules.push_back(intonevector+extempvector+inttwovector);
+							assrules.push_back(intonevector);
+							// assrules.push_back(inttwovector);
+						}
 					}
 			}
 		}
@@ -369,7 +422,6 @@ int main()
 		dupfim.clear();
 		if(fim.empty())
 		{
-			// cout << "empty\n";
 			break;
 		}
 		for (intRow = fim.begin(); intRow != fim.end(); intRow++)
@@ -380,10 +432,24 @@ int main()
 	    		if(intCol!=(intRow->end()-1))
 	    			cout << ",";
 	    	}
+	    	totalfimcount++;
 	    	cout << "\n";
 		}
 		w++;
 	}
-	// cout << "skdh\n";
+	cout << totalfimcount << "\n";
+
+	for (itRow = assrules.begin(); itRow != assrules.end(); itRow++)
+	{
+    	for (itCol = itRow->begin(); itCol != itRow->end(); itCol++) 
+    	{
+    		cout << *itCol;
+    		if(intCol!=(intRow->end()-1))
+    			cout << ",";
+    	}
+    	totalfimcount++;
+    	cout << "\n";
+	}
 	// pri_tree(root);
+	return 0;
 }
