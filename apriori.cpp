@@ -232,14 +232,45 @@ int main()
 	set<string>::iterator setiter;
 
 	string line;
+	string line1;
+	vector<string> configfile;
     int i=0,j=0,p,count,match=1,found,w,totalfimcount=0;
-    int toput=0,total_itemsets=0;
-    float minsup = 0.45;
-    float minconf = 0.8;
+    int toput=0,total_itemsets=0,totalasscount=0;
     extempvector.push_back("=>");
 
-	ifstream  data("TextbookInput.csv");
+    ifstream  dat("config.csv");
+    int flyflag=0;
+    while(getline(dat,line1))
+    {
+        stringstream lineStream(line1);
+        string cell1;
+        j=0;
+        while(getline(lineStream,cell1,','))
+        {
+        	if(cell1.length()>0)
+        	{
+        		// cout << cell1;
+        		if(flyflag==1)
+        			configfile.push_back(cell1);
+        		if(flyflag==0)
+        			flyflag=1;
+        		else
+        			flyflag=0;
+            	// tempvector.push_back(cell);
+            	// mapp.insert(cell);
+            }
+        }
+        // idata.push_back(tempvector);
+        tempvector.clear();
+    }
+    float minsup = std::atof(configfile[2].c_str());
+    float minconf = std::atof(configfile[3].c_str());
+    // float minsup = 0.04;
+    // float minconf = 0.8;
+
+	// ifstream  data("TextbookInput.csv");
 	// ifstream  data("inp.csv");
+	ifstream  data(configfile[0].c_str());
     while(getline(data,line))
     {
         stringstream lineStream(line);
@@ -303,18 +334,20 @@ int main()
 			inttempvector.clear();
 			inttempvector.push_back(i);
 			fim.push_back(inttempvector);
+			fimrules.push_back(inttempvector);
+			totalfimcount++;
 		}
 	}
 	*root = insert(root, fim, intduplicatevector, n);
-	for (intRow = fim.begin(); intRow != fim.end(); intRow++)
-	{
-    	for (intCol = intRow->begin(); intCol != intRow->end(); intCol++) 
-    	{
-    		cout << reverse_mapping[*intCol];
-    	}
-    	totalfimcount++;
-    	cout << "\n";
-	}
+	// for (intRow = fim.begin(); intRow != fim.end(); intRow++)
+	// {
+ //    	for (intCol = intRow->begin(); intCol != intRow->end(); intCol++) 
+ //    	{
+ //    		cout << reverse_mapping[*intCol];
+ //    	}
+ //    	totalfimcount++;
+ //    	cout << "\n";
+	// }
 
 	vector< vector <int> > twodimen;
 	vector<int> onetwodimen;
@@ -350,12 +383,13 @@ int main()
 				onetwodimen.push_back(*intRow->begin());
 				onetwodimen.push_back(*intdRow->begin());
 				dupfim.push_back(onetwodimen);
+				fimrules.push_back(onetwodimen);
 				intduplicatevector.push_back(twodimen[*intRow->begin()][*intdRow->begin()]);
 				onetwodimen.clear();
-				cout << reverse_mapping[*intRow->begin()];
-				cout << ",";
-				cout << reverse_mapping[*intdRow->begin()];
-				cout << "\n";
+				// cout << reverse_mapping[*intRow->begin()];
+				// cout << ",";
+				// cout << reverse_mapping[*intdRow->begin()];
+				// cout << "\n";
 				totalfimcount++;
 				if((cvv/occur[*intRow->begin()])>=minconf)
 				{
@@ -363,6 +397,7 @@ int main()
 					intonevector.push_back(set_index["=>"]);
 					intonevector.push_back(*intdRow->begin());
 					assrules.push_back(intonevector);
+					totalasscount++;
 					intonevector.clear();
 				}
 				if((cvv/occur[*intdRow->begin()])>=minconf)
@@ -371,6 +406,7 @@ int main()
 					intonevector.push_back(set_index["=>"]);
 					intonevector.push_back(*intRow->begin());
 					assrules.push_back(intonevector);
+					totalasscount++;
 					intonevector.clear();
 				}
 			}
@@ -424,6 +460,8 @@ int main()
 					if(toput >= mincount)
 					{
 						dupfim.push_back(inttempvector);
+						fimrules.push_back(inttempvector);
+						totalfimcount++;
 						intduplicatevector.push_back(toput);
 						bbb=inttempvector.size();
 						forassrules = bina(bbb);
@@ -447,7 +485,10 @@ int main()
 							// cout << qwerty;
 							// cout << "\n";
 							if((toput/qwerty)>=minconf)
+							{
 								assrules.push_back(intonevector);
+								totalasscount++;
+							}
 						}
 					}
 			}
@@ -459,32 +500,49 @@ int main()
 		{
 			break;
 		}
-		for (intRow = fim.begin(); intRow != fim.end(); intRow++)
-		{
-	    	for (intCol = intRow->begin(); intCol != intRow->end(); intCol++) 
-	    	{
-	    		cout << reverse_mapping[*intCol];
-	    		if(intCol!=(intRow->end()-1))
-	    			cout << ",";
-	    	}
-	    	totalfimcount++;
-	    	cout << "\n";
-		}
+		// for (intRow = fim.begin(); intRow != fim.end(); intRow++)
+		// {
+	 //    	for (intCol = intRow->begin(); intCol != intRow->end(); intCol++) 
+	 //    	{
+	 //    		cout << reverse_mapping[*intCol];
+	 //    		if(intCol!=(intRow->end()-1))
+	 //    			cout << ",";
+	 //    	}
+	 //    	totalfimcount++;
+	 //    	cout << "\n";
+		// }
 		w++;
 	}
-	cout << totalfimcount << "\n";
 
-	for (intRow = assrules.begin(); intRow != assrules.end(); intRow++)
+	ofstream towritefile;
+	towritefile.open(configfile[1].c_str());
+	towritefile << totalfimcount << "\n";
+	for (intRow = fimrules.begin(); intRow != fimrules.end(); intRow++)
 	{
     	for (intCol = intRow->begin(); intCol != intRow->end(); intCol++) 
     	{
-    		cout << reverse_mapping[*intCol];
+    		towritefile << reverse_mapping[*intCol];
     		if(intCol!=(intRow->end()-1))
-    			cout << ",";
+    			towritefile << ",";
+    	}
+    	// totalfimcount++;
+    	towritefile << "\n";
+	}
+	towritefile << totalasscount << "\n";
+
+	// towritefile << "hello" << "\n";
+	for (intRow = assrules.begin(); intRow != assrules.end() && std::atof(configfile[4].c_str())==1; intRow++)
+	{
+    	for (intCol = intRow->begin(); intCol != intRow->end(); intCol++) 
+    	{
+    		towritefile << reverse_mapping[*intCol];
+    		if(intCol!=(intRow->end()-1))
+    			towritefile << ",";
     	}
     	totalfimcount++;
-    	cout << "\n";
+    	towritefile << "\n";
 	}
 	// pri_tree(root);
+	towritefile.close();
 	return 0;
 }
