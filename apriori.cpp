@@ -8,8 +8,6 @@
 using namespace std;
 using namespace tr1;
 
-
-
 int n=0;
 float mincount;
 
@@ -33,8 +31,8 @@ node *createnode(int x)
 		int i;
 		temp->occur = 0;
 		temp->value = 0;
-		temp->child = (node**)malloc(x*sizeof(node*));
-		for(i = 0; i < x; i++)
+		temp->child = (node**)malloc((x+1)*sizeof(node*));
+		for(i = 0; i <= x; i++)
 		{
 			temp->child[i] = NULL;
 		}
@@ -64,25 +62,6 @@ node insert(node *root, vector<vector <int> > x, vector<int> y, int p)
 		temp->occur += *occurite;
 		occurite++;
 	}
-
-	// for(introw=x.begin(); introw != x.end(); introw++)
-	// {
-	// 	temp = root;
-	// 	for(intcol = introw->begin(); intcol != introw->end(); intcol++)
-	// 	{
-	// 		cout << *intcol;
-	// 		cout << " ";
-	// 	}
-	// 	cout << "\n";
-	// }
-	// cout << "hello\n";
-	// for(occurite = y.begin(); occurite!=y.end();occurite++)
-	// {
-	// 	cout << *occurite;
-	// 	cout << " ";
-	// }
-	// cout << "\n";
-	// cout << "hello1";
 	return *root;
 }
 
@@ -105,9 +84,7 @@ int check(vector< vector <int> > data, vector<int> x)
     		}
     	}
     	if(flag == len)
-    	{
     		occurences++;
-    	}
 	}
 	return occurences;
 	if(occurences>=mincount)
@@ -123,13 +100,9 @@ int binary(vector<int> data,int x)
 	while(1)
 	{
 		if(start>end)
-		{
 			return 0;
-		}
 		else if(data[mid]==x)
-		{
 			return 1;
-		}
 		else if(data[mid]<x)
 		{
 			start = mid+1;
@@ -171,13 +144,9 @@ int search(node *root, vector<int> x)
 	for(i = x.begin(); i != x.end() && occur==1; i++)
 	{
 		if(temp->child[*i]!=NULL)
-		{
 			temp = temp->child[*i];
-		}
 		else
-		{
 			occur=0;
-		}
 	}
 	return occur;
 }
@@ -189,14 +158,10 @@ int pri_tree(node *root)
 	cout << " ";
 	cout << temp->occur;
 	cout << "\n";
-	for(int i=1;i<=16;i++)
+	for(int i=1;i<=n;i++)
 	{
 		if(temp->child[i]!=NULL)
-		{
-			// cout << i;
-			// cout << " ";
 			pri_tree(temp->child[i]);
-		}
 	}	
 }
 
@@ -282,7 +247,7 @@ int main()
     	}
 	}
 	mincount=minsup*total_itemsets;
-	node *root = createnode(n+1);
+	node *root = createnode(n);
 	intduplicatevector.clear();
 	for(i=1;i<=n;i++)
 	{
@@ -294,19 +259,63 @@ int main()
 			fim.push_back(inttempvector);
 		}
 	}
-
-
 	*root = insert(root, fim, intduplicatevector, n);
 	for (intRow = fim.begin(); intRow != fim.end(); intRow++)
 	{
     	for (intCol = intRow->begin(); intCol != intRow->end(); intCol++) 
     	{
     		cout << reverse_mapping[*intCol];
-    		cout << " ";
+    		// cout << " ";
     	}
     	cout << "\n";
 	}
-	w=0;
+
+	vector< vector <int> > twodimen;
+	vector<int> onetwodimen;
+	for(int qqq=0;qqq<=n;qqq++)
+	{
+		onetwodimen.push_back(0);
+	}
+	for(int ppp=0;ppp<=n;ppp++)
+	{
+		twodimen.push_back(onetwodimen);
+	}
+	for (intRow = intdata.begin(); intRow != intdata.end(); intRow++)
+	{
+    	for (intCol = intRow->begin(); intCol != intRow->end(); intCol++) 
+    	{
+			for(intdCol = intCol+1; intdCol !=intRow->end(); intdCol++)
+			{    		
+    			twodimen[*intCol][*intdCol]++;
+    		}
+    	}
+	}
+	onetwodimen.clear();
+	dupfim.clear();
+	intduplicatevector.clear();
+	for (intRow = fim.begin(); intRow != fim.end(); intRow++)
+	{
+		for(intdRow = intRow+1; intdRow != fim.end() && match==1; intdRow++)
+		{
+			if(twodimen[*intRow->begin()][*intdRow->begin()]>=mincount)
+			{
+				onetwodimen.push_back(*intRow->begin());
+				onetwodimen.push_back(*intdRow->begin());
+				dupfim.push_back(onetwodimen);
+				intduplicatevector.push_back(twodimen[*intRow->begin()][*intdRow->begin()]);
+				onetwodimen.clear();
+				cout << reverse_mapping[*intRow->begin()];
+				cout << ",";
+				cout << reverse_mapping[*intdRow->begin()];
+				cout << "\n";
+			}
+		}
+	}
+	fim = dupfim;
+	*root = insert(root, fim, intduplicatevector, n);
+	dupfim.clear();
+
+	w=1;
 	while(1)
 	{
 		intduplicatevector.clear();
@@ -333,22 +342,22 @@ int main()
 						intdCol++;
 						j--;
 					}
-					if(match==0)
+					if(match == 0)
 						continue;
 					inttempvector.push_back(*intCol);
 					inttempvector.push_back(*intdCol);
 					toput = 1;
 					found = 1;
-					for(int z=0;z<inttempvector.size() && found==1;z++)
+					for(int z=0; z<inttempvector.size() && found == 1; z++)
 					{
 						intdupvector = inttempvector;
 						intdupvector.erase(intdupvector.begin()+z);
 						found = search(root,intdupvector);
 					}
-					if(found==0)
+					if(found == 0)
 						continue;
 					toput = checkb(intdata, inttempvector);
-					if(toput >= mincount && found==1)
+					if(toput >= mincount)
 					{
 						dupfim.push_back(inttempvector);
 						intduplicatevector.push_back(toput);
@@ -368,10 +377,13 @@ int main()
 	    	for (intCol = intRow->begin(); intCol != intRow->end(); intCol++) 
 	    	{
 	    		cout << reverse_mapping[*intCol];
-	    		cout << " ";
+	    		if(intCol!=(intRow->end()-1))
+	    			cout << ",";
 	    	}
 	    	cout << "\n";
 		}
 		w++;
 	}
+	// cout << "skdh\n";
+	// pri_tree(root);
 }
